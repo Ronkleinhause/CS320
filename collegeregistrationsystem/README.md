@@ -14,5 +14,5 @@ The build requirements are:
 Here are the supported build commands:
 - clean: Removes all the generated files (including the Java class files and the javadoc files)
 - document: Runs the javadoc tool to generate the API documentation (as HTML files)
-- compile: Compiles the application
+- compile: Compiles the application // This is the default build command.
 - test: Compiles the test suite and runs it
