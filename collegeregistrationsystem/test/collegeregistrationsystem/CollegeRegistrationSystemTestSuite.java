@@ -79,13 +79,25 @@ public class CollegeRegistrationSystemTestSuite
 	@Test
 	public void testGetCollegeMemberSucceeds() {
 		//TODO
-		Assert.fail();
+		Student student1 = testAddStudentSucceedsHelper();
+		int id_ = student1.getID();
+		Assert.assertNotNull(id_);
+		Assert.assertTrue(id_ > 0);
+		CollegeMember output;
+		try {
+			output = this.collegeRegistrationSystem_.getCollegeMember(id_);
+			Assert.assertEquals(student1, output);
+		} catch (CollegeMemberNotFoundException e) {
+			Assert.fail();
+		}
 	}
 	
-	@Test
-	public void testGetCollegeMemberReportsCollegeMemberNotFound() {
+	@Test(expected=CollegeMemberNotFoundException.class)
+	public void testGetCollegeMemberReportsCollegeMemberNotFound() throws CollegeMemberNotFoundException {
 		//TODO
-		Assert.fail();
+		Assert.assertFalse(this.collegeRegistrationSystem_.getCollegeMemberListing().hasNext());
+		// Call the unit under test
+		this.collegeRegistrationSystem_.getCollegeMember(1);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
@@ -240,8 +252,22 @@ public class CollegeRegistrationSystemTestSuite
 	
 	@Test
 	public void testEnrollReturnsTrue() {
-		//TODO
-		Assert.fail();
+		Student student1 = testAddStudentSucceedsHelper();
+		CourseSection courseSection1 = testAddCourseSectionSucceedsHelper();
+		Course course1 = courseSection1.getCourse();
+		int student_id = student1.getID();
+		int course_id = course1.getID();
+		int courseSectionNum = courseSection1.getSectionNumber();
+		Assert.assertNotNull(student_id);
+		Assert.assertNotNull(course_id);
+		Assert.assertNotNull(courseSectionNum);
+		Assert.assertTrue(student_id > 0 && course_id > 0 && courseSectionNum > 0);
+		try{
+			boolean enrolled = collegeRegistrationSystem_.enroll(course_id, courseSectionNum, student_id);
+			Assert.assertTrue(enrolled);
+		}catch(CollegeMemberNotFoundException | CourseNotFoundException | CourseSectionNotFoundException | CourseSectionFullException badException){
+			Assert.fail();
+		}
 	}
 	
 	@Test
