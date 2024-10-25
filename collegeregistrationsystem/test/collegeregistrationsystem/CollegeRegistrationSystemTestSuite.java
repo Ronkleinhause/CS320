@@ -1,5 +1,7 @@
 package collegeregistrationsystem;
 
+import static org.junit.Assert.assertThrows;
+
 import java.time.LocalDate;
 import java.util.Iterator;
 
@@ -78,7 +80,7 @@ public class CollegeRegistrationSystemTestSuite
 	
 	@Test
 	public void testGetCollegeMemberSucceeds() {
-		//TODO
+		
 		Student student1 = testAddStudentSucceedsHelper();
 		int id_ = student1.getID();
 		Assert.assertNotNull(id_);
@@ -94,7 +96,6 @@ public class CollegeRegistrationSystemTestSuite
 	
 	@Test(expected=CollegeMemberNotFoundException.class)
 	public void testGetCollegeMemberReportsCollegeMemberNotFound() throws CollegeMemberNotFoundException {
-		//TODO
 		Assert.assertFalse(this.collegeRegistrationSystem_.getCollegeMemberListing().hasNext());
 		// Call the unit under test
 		this.collegeRegistrationSystem_.getCollegeMember(1);
@@ -272,19 +273,98 @@ public class CollegeRegistrationSystemTestSuite
 	
 	@Test
 	public void testEnrollReturnsFalse() {
-		//TODO
-		Assert.fail();
+		Student student1 = testAddStudentSucceedsHelper();
+		Student student2 = this.collegeRegistrationSystem_.addStudent("CCC", "BBB", LocalDate.parse("2005-01-31"), "AA", "AA");
+		CourseSection courseSection1 = testAddCourseSectionSucceedsHelper();
+		Course course1 = courseSection1.getCourse();
+		int student_id = student1.getID();
+		int course_id = course1.getID();
+		try { 			//checking for CourseSectionFullException
+			CourseSection courseSection2 = this.collegeRegistrationSystem_.addCourseSection(course_id, 1);
+			Assert.assertTrue(collegeRegistrationSystem_.enroll(course_id, courseSection2.getSectionNumber(), student_id));
+			Assert.assertThrows(CourseSectionFullException.class, () -> {
+				collegeRegistrationSystem_.enroll(course_id, courseSection2.getSectionNumber(), student2.getID());	});
+		} catch (CourseNotFoundException | CollegeMemberNotFoundException | CourseSectionNotFoundException | CourseSectionFullException e) {
+			Assert.fail();
+		}
+
+		int courseSectionNum = courseSection1.getSectionNumber();
+		//check for other ecaeptions different edge cases for each value
+		Assert.assertThrows(CourseNotFoundException.class, () -> {
+            collegeRegistrationSystem_.enroll(5, courseSectionNum, student_id);	});
+		Assert.assertThrows(CourseNotFoundException.class, () -> {
+            collegeRegistrationSystem_.enroll(-1, courseSectionNum, student_id);	});
+		Assert.assertThrows(CourseNotFoundException.class, () -> {
+			collegeRegistrationSystem_.enroll(0, courseSectionNum, student_id);	});	
+		Assert.assertThrows(CourseSectionNotFoundException.class, () -> {
+            collegeRegistrationSystem_.enroll(course_id, 0, student_id);	});
+		Assert.assertThrows(CollegeMemberNotFoundException.class, () -> {
+            collegeRegistrationSystem_.enroll(course_id, courseSectionNum, -2045);	});
+		Assert.assertThrows(CourseSectionNotFoundException.class, () -> {
+            collegeRegistrationSystem_.enroll(course_id, 3222, student_id);	});
+		Assert.assertThrows(CollegeMemberNotFoundException.class, () -> {
+            collegeRegistrationSystem_.enroll(course_id, courseSectionNum, 0);	});
+		Assert.assertThrows(CourseSectionNotFoundException.class, () -> {
+			collegeRegistrationSystem_.enroll(course_id, -36, student_id);	});
+		Assert.assertThrows(CollegeMemberNotFoundException.class, () -> {
+			collegeRegistrationSystem_.enroll(course_id, courseSectionNum, 5);	});
+	}
+	@Test 
+	public void testDropReturnsTrue() throws CollegeMemberNotFoundException, CourseNotFoundException, CourseSectionNotFoundException, CourseSectionFullException {
+		//intializing
+		Student student1 = testAddStudentSucceedsHelper();
+		Student student2 = this.collegeRegistrationSystem_.addStudent("CCC", "BBB", LocalDate.parse("2005-01-31"), "AA", "AA");
+		CourseSection courseSection1 = testAddCourseSectionSucceedsHelper();
+		Course course1 = courseSection1.getCourse();
+		int student_id = student1.getID();
+		int course_id = course1.getID();
+		int sectionNumber = courseSection1.getSectionNumber();
+		//adding dropping, checking it was removed
+		Assert.assertTrue(courseSection1.enroll(student1));
+		Assert.assertTrue(courseSection1.enroll(student2));
+		int i = 0;
+		Iterator<Student> itr =  courseSection1.getEnrolledStudentsListing();
+		while (itr.hasNext()) {
+			itr.next();
+			i++;
+		}		Assert.assertEquals(i,2);
+		i=0;
+		Assert.assertTrue(courseSection1.drop(student1));
+		itr =  courseSection1.getEnrolledStudentsListing();
+		while (itr.hasNext()) {
+			itr.next();
+			i++;
+		}
+		Assert.assertEquals(i,1);
+		i=0;
+		Assert.assertTrue(courseSection1.drop(student2));
+		itr =  courseSection1.getEnrolledStudentsListing();
+		while (itr.hasNext()) {
+			itr.next();
+			i++;
+		}		
+		Assert.assertEquals(i,0);		
 	}
 	
 	@Test 
-	public void testDropReturnsTrue() {
-		//TODO
-		Assert.fail();
-	}
-	
-	@Test 
-	public void testDropReturnsFalse() {
-		//TODO
-		Assert.fail();
+	public void testDropReturnsFalse() throws CourseSectionFullException {
+		//intializing
+		Student student1 = testAddStudentSucceedsHelper();
+		Student student2 = this.collegeRegistrationSystem_.addStudent("CCC", "BBB", LocalDate.parse("2005-01-31"), "AA", "AA");
+		CourseSection courseSection1 = testAddCourseSectionSucceedsHelper();
+		Course course1 = courseSection1.getCourse();
+		int student_id = student1.getID();
+		int course_id = course1.getID();
+		int sectionNumber = courseSection1.getSectionNumber();
+		//adding two students
+		Assert.assertTrue(courseSection1.enroll(student1));
+		Assert.assertTrue(courseSection1.enroll(student2));
+		//asserting throws right exceptions
+		Assert.assertThrows(CourseNotFoundException.class, () -> {
+            collegeRegistrationSystem_.drop(5, sectionNumber, student_id);	});
+		Assert.assertThrows(CourseSectionNotFoundException.class, () -> {
+            collegeRegistrationSystem_.drop(course_id, 5, student_id);	});
+		Assert.assertThrows(CollegeMemberNotFoundException.class, () -> {
+            collegeRegistrationSystem_.drop(course_id, sectionNumber, 5);	});
 	}
 }

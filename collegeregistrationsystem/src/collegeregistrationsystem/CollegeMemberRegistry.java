@@ -50,6 +50,7 @@ public class CollegeMemberRegistry
 	//TODO: Use the strategy design pattern to take a comparator
 	public synchronized Iterator<CollegeMember> getCollegeMemberListing() {
 		// This is the iterator design pattern.
+		
 		return this.mapIDtoCollegeMember_.values().iterator();
 	}
 }
