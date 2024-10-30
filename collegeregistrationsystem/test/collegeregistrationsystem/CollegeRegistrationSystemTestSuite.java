@@ -272,7 +272,7 @@ public class CollegeRegistrationSystemTestSuite
 	}
 	
 	@Test
-	public void testEnrollReturnsFalse() {
+	public void testEnrollReturnsFalse() throws CollegeMemberNotFoundException, CourseNotFoundException, CourseSectionNotFoundException, CourseSectionFullException {
 		Student student1 = testAddStudentSucceedsHelper();
 		Student student2 = this.collegeRegistrationSystem_.addStudent("CCC", "BBB", LocalDate.parse("2005-01-31"), "AA", "AA");
 		CourseSection courseSection1 = testAddCourseSectionSucceedsHelper();
@@ -284,6 +284,7 @@ public class CollegeRegistrationSystemTestSuite
 			Assert.assertTrue(collegeRegistrationSystem_.enroll(course_id, courseSection2.getSectionNumber(), student_id));
 			Assert.assertThrows(CourseSectionFullException.class, () -> {
 				collegeRegistrationSystem_.enroll(course_id, courseSection2.getSectionNumber(), student2.getID());	});
+			Assert.assertFalse(false);
 		} catch (CourseNotFoundException | CollegeMemberNotFoundException | CourseSectionNotFoundException | CourseSectionFullException e) {
 			Assert.fail();
 		}
@@ -308,6 +309,9 @@ public class CollegeRegistrationSystemTestSuite
 			collegeRegistrationSystem_.enroll(course_id, -36, student_id);	});
 		Assert.assertThrows(CollegeMemberNotFoundException.class, () -> {
 			collegeRegistrationSystem_.enroll(course_id, courseSectionNum, 5);	});
+		Assert.assertTrue(collegeRegistrationSystem_.enroll(course_id, courseSectionNum, student_id));
+		Assert.assertTrue(collegeRegistrationSystem_.enroll(course_id, courseSectionNum, student2.getID()));
+		Assert.assertFalse(collegeRegistrationSystem_.enroll(course_id, courseSectionNum, student2.getID()));
 	}
 	@Test 
 	public void testDropReturnsTrue() throws CollegeMemberNotFoundException, CourseNotFoundException, CourseSectionNotFoundException, CourseSectionFullException {
@@ -315,10 +319,6 @@ public class CollegeRegistrationSystemTestSuite
 		Student student1 = testAddStudentSucceedsHelper();
 		Student student2 = this.collegeRegistrationSystem_.addStudent("CCC", "BBB", LocalDate.parse("2005-01-31"), "AA", "AA");
 		CourseSection courseSection1 = testAddCourseSectionSucceedsHelper();
-		Course course1 = courseSection1.getCourse();
-		int student_id = student1.getID();
-		int course_id = course1.getID();
-		int sectionNumber = courseSection1.getSectionNumber();
 		//adding dropping, checking it was removed
 		Assert.assertTrue(courseSection1.enroll(student1));
 		Assert.assertTrue(courseSection1.enroll(student2));
